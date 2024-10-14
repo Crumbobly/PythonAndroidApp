@@ -1,0 +1,901 @@
+#:import MapSource kivy_garden.mapview.MapSource
+#:import ScrollEffect kivy.effects.scroll.ScrollEffect
+#:import ew kivy.uix.effectwidget
+#:import information_text main
+
+<ItemConfirm>
+    CheckboxLeftWidget:
+        id: check
+        group: "check"
+        on_release: root.set_icon(check, root)
+
+<SmallBoxLayoutCircle@MDBoxLayout>
+    opacity: 1
+    size_hint: None, None
+    height: dp(9)
+    width: dp(9)
+    radius: [dp(90),dp(90),dp(90),dp(90)]
+    md_bg_color: app.theming.get(self, "md_bg_color", "slider_color")
+
+<MDMainLabel@MDLabel>
+    halign: 'center'
+    bold: True
+    color: app.theming.get(self, "color", 'main_labels_color')
+    valign: 'bottom'
+    font_size: dp(16)
+    adaptive_height: True
+
+<MainLabel@Label>
+    halign: 'center'
+    color: app.theming.get(self, "color", 'main_labels_color')
+    valign: 'bottom'
+    font_size: dp(16)
+    size_hint_y: None
+
+<MyTextField@MDTextField>:
+    halign: "center"
+    mode: "fill"
+    radius: [10,10,10,10]
+    fill_color: 251/255, 1, 245/255, 0
+    helper_text_mode: "persistent"
+
+<Settings>:
+    MDBoxLayout:
+        orientation: "vertical"
+        size: root.width, root.height
+        md_bg_color: app.theming.get(self, "md_bg_color", "background_color")
+
+        MDToolbar:
+            id: settings_toolbar
+            title: "Settings"
+            anchor_title: "center"
+
+            md_bg_color: app.theming.get(self, "md_bg_color", 'base_color')
+            left_action_items: [["arrow-left", lambda x: root.go_to_main(), "Home"]]
+            right_action_items: [["", lambda x: None,]]
+            specific_text_color: app.theming.get(self, "specific_text_color", 'toolbar_text_color')
+            elevation: 8
+
+        ScrollView:
+            do_scroll_x: False
+            do_scroll_y: True
+            bar_width: 5
+            effect_cls: ScrollEffect
+
+            MDBoxLayout:
+                orientation: "vertical"
+                adaptive_height: True
+                padding: "16dp"
+
+                MDLabel:
+                    color: app.theming.get(self, "color", 'base_color')
+                    bold: True
+                    text: "Application ID"
+                    adaptive_height: True
+
+                OneLineListItemWithSwitch:
+                    text: "Use my APPID"
+
+                    RightSwitch:
+                        id: appid_switch1
+                        active: not appid_switch2.active
+                        on_active: root.switch_touch(field_appid_settings) if self.active else None
+
+                TwoLineListItemWithSwitch:
+                    text: "I don't have APPID"
+                    secondary_text: "Use application APPID"
+
+                    RightSwitch:
+                        id: appid_switch2
+                        active: not appid_switch1.active
+                        on_active: root.switch_touch(field_appid_settings) if self.active else None
+
+                MyTextField:
+                    id: field_appid_settings
+                    disabled: appid_switch2.active
+                    required: appid_switch1.active
+
+                    helper_text: 'Space detected' if (' ' in self.text and appid_switch1.active) else '\0'
+                    hint_text: "APPID:"
+
+                MDSeparator:
+
+                MDLabel:
+                    color: app.theming.get(self, "color", 'base_color')
+                    bold: True
+                    text: "Geolocation"
+                    adaptive_height: True
+                    padding_y: "8dp"
+
+                TwoLineListItemWithSwitch:
+                    text: "Use city & country tag"
+                    secondary_text: "API key is needed"
+
+                    RightSwitch:
+                        id: gps_switch1
+                        active: not gps_switch2.active and not gps_switch3.active
+                        on_active: root.switch_touch(field_gps3_settings, field_gps4_settings) if self.active else None
+                        on_active: app.gps.stop() if self.active else None
+
+                TwoLineListItemWithSwitch:
+                    text: "Use GPS"
+                    secondary_text: "GPS required"
+
+                    RightSwitch:
+                        id: gps_switch2
+                        active: not gps_switch1.active and not gps_switch3.active
+                        on_active: root.switch_touch(field_gps1_settings, field_gps2_settings, field_gps3_settings, field_gps4_settings) if self.active else None
+                        on_active: app.gps.start() if self.active else None
+
+                TwoLineListItemWithSwitch:
+                    text: "Use lat & lon"
+                    secondary_text: "Use input (not GPS) lat & lon"
+
+                    RightSwitch:
+                        id: gps_switch3
+                        active: not gps_switch2.active and not gps_switch1.active
+                        on_active: root.switch_touch(field_gps1_settings, field_gps2_settings) if self.active else None
+                        on_active: app.gps.stop() if self.active else None
+
+
+                MyTextField:
+                    id: field_gps1_settings
+                    disabled: gps_switch2.active or gps_switch3.active
+                    required: gps_switch1.active
+
+                    helper_text: 'Space detected' if (' ' in self.text and gps_switch1.active) else '\0'
+                    hint_text: "City (any language):"
+
+                MDSeparator:
+                MDSeparator:
+                    opacity: 0
+                    height: dp(10)
+
+                MyTextField:
+                    id: field_gps2_settings
+                    disabled: gps_switch2.active or gps_switch3.active
+                    required: gps_switch1.active
+
+                    helper_text: 'Space detected' if (' ' in self.text and gps_switch1.active) else '\0'
+                    hint_text: "Tag:"
+
+                MDSeparator:
+                MDSeparator:
+                    opacity: 0
+                    height: dp(15)
+
+                MyTextField:
+                    id: field_gps3_settings
+                    disabled: gps_switch2.active or gps_switch1.active
+                    required: gps_switch3.active
+
+                    helper_text: 'Space detected' if (' ' in self.text and gps_switch3.active) else '\0'
+                    hint_text: "Latitude:"
+
+                MDSeparator:
+                MDSeparator:
+                    opacity: 0
+                    height: dp(10)
+
+                MyTextField:
+                    id: field_gps4_settings
+                    disabled: gps_switch2.active or gps_switch1.active
+                    required: gps_switch3.active
+
+                    helper_text: 'Space detected' if (' ' in self.text and gps_switch3.active) else '\0'
+                    hint_text: "Longitude:"
+
+                MDSeparator:
+
+
+                MDLabel:
+                    color: app.theming.get(self, "color", 'base_color')
+                    bold: True
+                    text: "Timezone"
+                    adaptive_height: True
+                    padding_y: "8dp"
+
+                OneLineListItemWithSwitch:
+                    text: "Use your phone timezone"
+
+                    RightSwitch:
+                        id: timezone_switch1
+                        active: not timezone_switch2.active
+
+                TwoLineListItemWithSwitch:
+                    text: "Use auto timezone"
+                    secondary_text: "By your weather request"
+
+                    RightSwitch:
+                        id: timezone_switch2
+                        active: not timezone_switch1.active
+
+
+                MDLabel:
+                    color: app.theming.get(self, "color", 'base_color')
+                    bold: True
+                    text: "Theming"
+                    adaptive_height: True
+                    padding_y: "8dp"
+
+
+                OneLineListItemWithSwitch:
+                    text: "Application theme\n"
+
+                    RightIcon:
+                        on_press: root.create_theme_change_dialog()
+
+
+                MDLabel:
+                    color: app.theming.get(self, "color", 'base_color')
+                    bold: True
+                    text: "Reset Application"
+                    adaptive_height: True
+                    padding_y: "8dp"
+
+                MDRoundFlatButton:
+                    id: reset
+                    text: "Reset"
+                    pos_hint: {"center_x": .5, "center_y": .5}
+                    size_hint_y: None
+                    width: root.width - 16*2
+                    line_color: 235/255, 78/255, 30/255, 0.8
+                    line_width: "1.25dp"
+                    text_color: app.theming.get(self, "text_color", 'bottom_nav_icon_color')
+                    on_release: root.create_dialog()
+
+    MDIcon:
+        icon: "cog"
+        font_size: "200sp"
+        theme_text_color: "Custom"
+        halign: "center"
+        opacity: .1
+
+
+
+<HelloScreen>:
+    MDBoxLayout:
+        orientation: "vertical"
+        size: root.width, root.height
+
+        FitImage:
+            source: app.theming.get(self, "source", 'background_blur_image')
+
+
+    MDBoxLayout:
+        orientation: "vertical"
+        size: root.width, root.height
+
+
+        MDLabel:
+            text: "Hello"
+            opacity: 0.4
+            font_size: root.height/10
+            halign: "center"
+            color: app.theming.get(self, "color", 'hello_text_color')
+
+        MDLabel:
+            text: "To continue do a \n long swap to the left"
+            opacity: 0.5
+            font_size: root.height/40
+            halign: "center"
+            color: app.theming.get(self, "color", 'hello_text_color')
+
+        Image:
+            source: app.theming.get(self, "source", 'gif')
+            halign: "center"
+            color: app.theming.get(self, "color", 'hello_text_color')
+            opacity: .2
+            anim_delay: 0.05
+            anim_loop: 0
+
+
+<DialogContent>:
+    orientation: 'vertical'
+    padding: 10
+
+    MDLabel:
+        adaptive_height: True
+        text: 'User License Agreement\n'
+        color: app.theming.get(self, "color", 'base_color')
+        halign: 'center'
+        bold: True
+
+    MDSeparator:
+
+    ScrollView:
+        do_scroll_x: False
+        do_scroll_y: True
+        effect_cls: ScrollEffect
+        bar_width: 0
+        on_scroll_stop: root.scroll_dialog(self.scroll_y)
+
+        MDGridLayout:
+            cols: 1
+            adaptive_height: True
+
+            MDLabel:
+                multiline: True
+                text: root.information_text
+                color: app.theming.get(self, "color", 'settings_and_dialog_text_color')
+
+                size_hint_y: None
+                adaptive_height: True
+
+            MDLabel:
+                multiline: True
+                text: root.license_text
+                color: app.theming.get(self, "color", 'settings_and_dialog_text_color')
+
+                size_hint_y: None
+                adaptive_height: True
+
+            MDLabel:
+                id: agree_lbl
+                text: '\nDo you agree?\n'
+                color: app.theming.get(self, "color", 'base_color')
+                bold: True
+                adaptive_height: True
+                halign: 'center'
+
+
+    MDSeparator:
+
+    MDBoxLayout:
+        id: box
+        orientation: 'vertical'
+        size_hint_y: None
+        height: dp(50)
+
+        MDRelativeLayout:
+            size_hint_y: None
+            height: dp(50)
+
+            MDRectangleFlatButton:
+                id: btn1
+                disabled: True
+                text: "No, i disagree"
+                text_color: app.theming.theme_kit['settings_and_dialog_text_color']
+                line_color: app.theming.theme_kit['base_color']
+                on_release: app.stop()
+                adaptive_height: True
+                pos_hint: {'right': 1}
+
+            MDRectangleFlatButton:
+                id: btn2
+                disabled: True
+                text: "Yes, i agree"
+                text_color: app.theming.theme_kit['settings_and_dialog_text_color']
+                line_color: app.theming.theme_kit['base_color']
+                on_release: root.close_dialog()
+                adaptive_height: True
+
+
+<LogInScreen>:
+    on_touch_up: None
+
+    MDBoxLayout:
+        orientation: "vertical"
+        size: root.width, root.height
+
+        FitImage:
+            source: app.theming.get(self, "source", 'background_blur_image')
+
+    MDBoxLayout:
+        md_bg_color: app.theming.get(self, "md_bg_color", 'background_color_opacity')
+
+
+    MDRelativeLayout:
+        MDFlatButton:
+            text: "[b]User License Agreement[/b]"
+            theme_text_color: "Custom"
+            text_color: app.theming.get(self, "text_color", "base_color")
+            pos_hint: {'center_x':.5, "top":.98}
+            on_press: root.create_agreement()
+
+    MDBoxLayout:
+        orientation: 'vertical'
+        pos_hint: {'center_y':1}
+        padding: 20
+        spacing: sp(20)
+
+        MDTextField:
+            id: field_ctag
+            mode: "fill"
+            halign: "center"
+            radius: [10,10,10,10]
+
+            helper_text_mode: "persistent"
+            helper_text: 'Space detected' if (' ' in self.text and not latlon.active) else '\0'
+            hint_text: "City/town:"
+            icon_right: "flag"
+
+
+        MDTextField:
+            id: field_city
+            halign: "center"
+            mode: "fill"
+            radius: [10,10,10,10]
+
+            helper_text_mode: "persistent"
+            helper_text: 'Space detected' if (' ' in self.text and not latlon.active) else '\0'
+            hint_text: "Country tag:"
+            icon_right: "home"
+
+        MDGridLayout:
+            size_hint_y: None
+            adaptive_height: True
+            cols: 2
+
+            MDLabel:
+                text: "Use GPS"
+                adaptive_height: True
+                color: app.theming.get(self, "color", 'login_text_color')
+
+            CheckBox:
+                id: latlon
+                color: 0,0,0,1
+                on_active: root.checkbox_touch('latlon', self.active)
+
+    MDBoxLayout:
+        orientation: 'vertical'
+        pos_hint: {'center_y':.75}
+        padding: 20
+        spacing: 20
+
+        MDTextField:
+            id: field_appid
+            halign: "center"
+            mode: "fill"
+            radius: [10,10,10,10]
+
+            helper_text_mode: "persistent"
+            helper_text: 'Space detected' if (' ' in self.text and not appid.active) else '\0'
+            hint_text: "APPID:"
+            icon_right: "key"
+
+
+        MDGridLayout:
+            size_hint_y: None
+            adaptive_height: True
+            cols: 2
+
+            MDLabel:
+                text: "Haven't APPID"
+                adaptive_height: True
+                color: app.theming.get(self, "color", 'login_text_color')
+
+            CheckBox:
+                id: appid
+                color: 0,0,0,1
+                on_active: root.checkbox_touch('appid', self.active)
+
+
+    MDRelativeLayout:
+        id: lay3
+        size_hint: 1, .1
+        md_bg_color: app.theming.get(self, "md_bg_color", 'login_background_color')
+        radius: -dp(10), -dp(10), 0, 0
+
+        Image
+            source: app.theming.get(self, "source", 'background_forest')
+            pos_hint: {"center_y": 1.4 + self.height/root.height}
+
+        MDRoundFlatButton:
+            text: "Continue"
+            line_color: app.theming.get(self, "line_color", 'login_btn_line_color')
+            line_width: "1.05dp"
+            text_color: app.theming.get(self, "text_color", 'bottom_nav_icon_color')
+            pos_hint: {"center_x": .5, 'y': 0.1}
+            width: root.width - 16*2
+
+            on_press:
+                if root.first_open(): root.go_to_main(), app.start_dynamic_update(), app.weather.reset_labels()
+
+    MDIcon:
+        icon: "lock"
+        font_size: "200sp"
+        theme_text_color: "Custom"
+        halign: "center"
+        opacity: .1
+
+
+<MD3Card>
+    padding: 5
+
+    BoxLayout:
+        orientation: "vertical"
+
+        MDLabel:
+            id: label
+            text: root.text
+            markup: True
+            halign: "center"
+            color: app.theming.get(self, "color", 'MD3CARD_text_color')
+
+        MDLabel:
+            id: label_max
+            text: root.max + " | " + root.min if icon.height < root.height/1.65 else ""
+            halign: "center"
+            color: app.theming.get(self, "color", 'MD3CARD_text_color')
+
+        MDIcon:
+            id: icon
+            icon: root.icon
+            size_hint: (None, None)
+            height: dp(60)
+            width: dp(60)
+            pos_hint: {"center_x": .5}
+
+
+<Application>:
+    BoxLayout:
+        orientation: "vertical"
+        size: root.width, root.height
+
+        MDToolbar:
+            id: toolbar1
+            title: app.weather.checks[1]
+
+            anchor_title: "center"
+            md_bg_color: app.theming.get(self, "md_bg_color", 'base_color')
+
+            left_action_items: [["cog", lambda x: root.go_to_settings()]]
+            right_action_items: [["update", lambda x: app.reload_weather()]]
+            specific_text_color: app.theming.get(self, "specific_text_color", 'toolbar_text_color')
+            elevation: 8
+
+
+        MDBottomNavigation:
+            id: bottom_nav
+
+            text_color_normal: app.theming.get(self, "text_color_normal", 'bottom_nav_icon_color')
+            text_color_active: app.theming.get(self, "text_color_active", 'base_color')
+            panel_color: app.theming.get(self, "panel_color", 'bottom_nav_color')
+
+            MDBottomNavigationItem:
+                name: "screen1"
+                icon: "home"
+                text: "Home"
+
+                FitImage:
+                    source: app.theming.get(self, "source", 'background_image')
+
+                MDBoxLayout:
+                    padding: [0,5,0,0]
+                    orientation: "vertical"
+
+                    MDLabel:
+                        id: lastupdate
+                        text: " N/A\n"
+                        color: app.theming.get(self, "color", 'main_labels_color')
+                        halign: 'left'
+                        valign: 'top'
+                        adaptive_height: True
+                        font_size: dp(12)
+
+                    MDMainLabel:
+                        id: nowdate
+                        text: "Today is N/A"
+                        bold: False
+                        font_size: dp(18)
+
+                    MDMainLabel:
+                        id: nowrealtemp
+                        text: "N/A"
+                        bold: False
+                        font_size: dp(58)
+
+                    MDMainLabel:
+                        id: nowfeeltemp
+                        text: "Feels like N/A"
+                        bold: False
+                        font_size: dp(18)
+
+
+                    MyCarousel:
+                        GridLayout:
+                            cols: 2
+                            padding: [0, dp(20), 0, dp(20)]
+                            spacing: dp(7)
+
+                            MainLabel:
+                                id: max_temp_lbl
+                                text: "Max temp"
+                                bold: True
+                                height: dp(19)
+                            MainLabel:
+                                id: min_temp_lbl
+                                text: "Min temp"
+                                bold: True
+                                height: dp(19)
+
+                            MainLabel:
+                                id: maxtemp
+                                text: "N/A°C\n"
+                                opacity: 1
+                                height: dp(38)
+                            MainLabel:
+                                id: mintemp
+                                text: "N/A°C\n"
+                                opacity: 1
+                                height: dp(38)
+
+
+                            Image:
+                                source: "sunrise.png"
+                                size_hint: None, None
+                                size: dp(70), dp(70)
+                                pos: root.width/4 - dp(35), self.y
+                                color: app.theming.get(self, "color", 'main_labels_color')
+                            Image:
+                                source: "sunset.png"
+                                size_hint: None, None
+                                size: dp(70), dp(70)
+                                pos: root.width/4 * 3 - dp(35), self.y
+                                color: app.theming.get(self, "color", 'main_labels_color')
+
+                            MDMainLabel:
+                                id: sunrise
+                                text: "N/A"
+                                bold: False
+                            MDMainLabel:
+                                id: sunset
+                                text: "N/A"
+                                bold: False
+
+                        GridLayout:
+                            cols: 2
+                            padding: [0, dp(40), 0, dp(20)]
+                            spacing: dp(7)
+
+                            MDMainLabel:
+                                text: "Average wind speed"
+                            MDMainLabel:
+                                id: avgwindspeed
+                                bold: False
+                                text: "N/A"
+
+                            MDMainLabel:
+                                text: "Max wind speed"
+                            MDMainLabel:
+                                id: maxwindspeed
+                                bold: False
+                                text: "N/A"
+
+                            MDMainLabel:
+                                text: "Max wind gust"
+                            MDMainLabel:
+                                id: maxwindgust
+                                bold: False
+                                text: "N/A"
+
+                            MDMainLabel:
+                                text: "Dominant wind direction"
+                            MDMainLabel:
+                                id: winddirrection
+                                bold: False
+                                text: "N/A"
+
+                            MDMainLabel:
+                                text: "Precipitation Sum"
+                            MDMainLabel:
+                                id: precsum
+                                bold: False
+                                text: "N/A"
+
+                    BoxLayout:
+                        id: circles
+                        orientation: "horizontal"
+                        size_hint: None, None
+                        height: dp(5)
+                        width: dp(18)
+                        pos_hint: {"center_x": .5}
+
+                        SmallBoxLayoutCircle:
+                            id: first_slide
+
+                        SmallBoxLayoutCircle:
+                            id: second_slide
+                            opacity: .2
+
+                    MDBoxLayout:
+                        padding: [dp(7),0,dp(7),0]
+                        adaptive_height: True
+                        orientation: "horizontal"
+
+                        MDBoxLayout:
+                            adaptive_height: True
+                            radius: [dp(20), dp(20), 0, 0]
+                            md_bg_color: app.theming.get(self, "md_bg_color", "rounded_layout_color")
+
+                            MDRaisedButton:
+                                elevation: 0
+                                md_bg_color: self.md_bg_color[:-1]+[0]
+                                radius: [dp(20), dp(20), dp(20), dp(20)]
+
+                                width: self.parent.width
+                                on_release: graphs_carousel.load_previous()
+                                on_release: app.anim_change_opacity(rain, 0)
+                                on_release: app.anim_change_opacity(hours, 1)
+
+                                MDIcon:
+                                    halign: "center"
+                                    color: app.theming.get(self, "color", 'MD3CARD_text_color')
+                                    icon: "clock-time-one-outline"
+
+                        MDBoxLayout:
+                            adaptive_height: True
+                            radius: [dp(20), dp(20), 0, 0]
+                            md_bg_color: app.theming.get(self, "md_bg_color", "rounded_layout_color")
+
+                            MDRaisedButton:
+                                elevation: 0
+                                radius: [dp(20), dp(20), dp(20), dp(20)]
+                                md_bg_color: self.md_bg_color[:-1]+[0]
+
+                                width: self.parent.width
+                                on_release: graphs_carousel.load_next()
+                                on_release: app.anim_change_opacity(hours, 0)
+                                on_release: app.anim_change_opacity(rain, 1)
+
+                                MDIcon:
+                                    halign: "center"
+                                    color: app.theming.get(self, "color", 'MD3CARD_text_color')
+                                    icon: "water-outline"
+
+
+                    BoxLayout:
+                        size_hint: 1, None
+                        padding: [dp(7),0,dp(7),dp(5)]
+                        height: days.height * 1.6
+
+                        MDBoxLayout:
+                            id: graphs
+                            orientation: "horizontal"
+                            radius: [0, 0, dp(20), dp(20)]
+                            md_bg_color: app.theming.get(self, "md_bg_color", "rounded_layout_color")
+                            padding: dp(10)
+
+                            MyNoneTouchCarousel:
+                                id: graphs_carousel
+
+                                BoxLayout:
+                                    ScrollView:
+                                        id: hours_scroll_view
+                                        do_scroll_x: True
+                                        do_scroll_y: False
+                                        bar_width: 0
+                                        effect_cls: ScrollEffect
+
+                                        MDGridLayout:
+                                            id: hours
+                                            rows: 4
+                                            cols: 24
+
+                                            adaptive_width: True
+                                            col_default_width: dp(60)
+                                            width: self.minimum_width if self.minimum_width >= self.parent.width else self.parent.width
+
+
+                                BoxLayout:
+                                    id: rain
+                                    spacing: dp(3)
+
+
+                    BoxLayout:
+                        size_hint: 1, None
+                        height: days.height
+
+                        ScrollView:
+                            do_scroll_x: True
+                            do_scroll_y: False
+                            bar_width: 0
+                            size_hint: 1, None
+                            height: root.height/7.5
+                            effect_cls: ScrollEffect
+
+                            MDGridLayout:
+                                id: days
+                                spacing: dp(5)
+                                padding: [dp(5),0,dp(5),dp(5)]
+                                rows: 1
+                                adaptive_width: True
+
+                                col_default_width: self.parent.height/1.1
+                                width: self.minimum_width if self.minimum_width >= self.parent.width else root.width
+
+            MDBottomNavigationItem:
+                name: "screen2"
+                icon: "map"
+                text: "map"
+
+                BoxLayout:
+                    orientation: "vertical"
+
+                    MDSeparator:
+                        color: app.theming.get(self, "md_bg_color", 'toolbar_text_color')
+
+                    MDGridLayout:
+                        adaptive_height: True
+                        md_bg_color: app.theming.get(self, "md_bg_color", 'base_color')
+                        cols: 2
+                        rows: 1
+
+                        MDRectangleFlatIconButton:
+                            width: root.width / 2
+                            line_color: (0, 0, 0, 0)
+                            icon: "home"
+                            text: "Home"
+                            icon_color: app.theming.get(self, "icon_color", 'toolbar_text_color')
+                            text_color: app.theming.get(self, "text_color", 'toolbar_text_color')
+
+                            on_press:
+                                root.map_update()
+
+                        MDRectangleFlatIconButton:
+                            width: root.width / 2
+                            line_color: (0, 0, 0, 0)
+                            icon: "cloud-outline"
+                            text: "Weather"
+                            icon_color: app.theming.get(self, "icon_color", 'toolbar_text_color')
+                            text_color: app.theming.get(self, "text_color", 'toolbar_text_color')
+
+                            on_press:
+                                app.map_load_weather()
+
+                    MapView:
+                        id: map
+
+                        lat: 0
+                        lon: 0
+                        zoom: 12
+
+                        MDIcon:
+                            icon: "plus"
+                            font_size: "20sp"
+                            adaptive_size: True
+                            theme_text_color: "Custom"
+                            pos: (self.parent.width/2, self.parent.height/2)
+
+
+            MDBottomNavigationItem:
+                name: "screen4"
+                text: "check"
+                icon: "check"
+                icon: "alert"
+
+                MDBoxLayout:
+                    md_bg_color: app.theming.get(self, "md_bg_color", 'background_color')
+
+                    GridLayout:
+                        padding: 20
+                        spacing: dp(60)
+                        cols: 2
+
+                        MDLabel:
+                            text: "Internet: "
+                            color: app.theming.get(self, "color", 'settings_and_dialog_text_color')
+                            adaptive_height: True
+                        MDLabel:
+                            text: app.weather.checks[0]
+                            color: 1,0,0,1
+                            adaptive_height: True
+
+                        MDLabel:
+                            text: "City/Town: "
+                            color: app.theming.get(self, "color", 'settings_and_dialog_text_color')
+                            adaptive_height: True
+                        MDLabel:
+                            text: app.weather.checks[1]
+                            color: 1,0,0,1
+                            adaptive_height: True
+
+                        MDLabel:
+                            text: "GPS: "
+                            color: app.theming.get(self, "color", 'settings_and_dialog_text_color')
+                            adaptive_height: True
+                        MDLabel:
+                            text: app.gps.gps_location_string
+                            color: 1,0,0,1
+                            adaptive_height: True
